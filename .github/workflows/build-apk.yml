@@ -5,6 +5,9 @@ on:
   push:
     branches: [custom-dimension]
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-22.04
@@ -41,3 +44,14 @@ jobs:
         with:
           name: blocktopograph-apk
           path: app/build/outputs/apk/**/*.apk
+
+      # Publish the APK as a release so it can be downloaded straight from a phone browser.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          APK=$(find app/build/outputs/apk -name '*.apk' | head -1)
+          cp "$APK" blocktopograph-customdim.apk
+          gh release create "apk-${{ github.run_number }}" blocktopograph-customdim.apk \
+            --title "Blocktopograph custom dimension build ${{ github.run_number }}" \
+            --notes "Debug APK with custom dimension (id 1000+) support." --target "${{ github.sha }}"
