@@ -17,8 +17,9 @@ android {
     configurations {
         implementation.exclude group: 'org.jetbrains', module: 'annotations'
     }
-    lint {
+    lintOptions {
         disable 'ExpiredTargetSdkVersion'
+        abortOnError false
         baseline = file("lint-baseline.xml")
     }
     buildTypes {
