@@ -20,7 +20,6 @@ android {
     lintOptions {
         disable 'ExpiredTargetSdkVersion'
         abortOnError false
-        baseline = file("lint-baseline.xml")
     }
     buildTypes {
 
