@@ -15,7 +15,9 @@ jobs:
       - name: Fetch leveldb-mcpe
         run: |
           rm -rf leveldb/src/main/cpp/leveldb-mcpe
-          git clone --depth 1 https://github.com/Mojang/leveldb-mcpe.git leveldb/src/main/cpp/leveldb-mcpe
+          # Mojang/leveldb-mcpe was removed from GitHub; this is a copy of it with the same file layout.
+          git clone https://github.com/ddsswifttech/leveldb-mcpe.git leveldb/src/main/cpp/leveldb-mcpe
+          git -C leveldb/src/main/cpp/leveldb-mcpe checkout 82785f08c44905d7e8f8bdf9488c9d56c4257db9
 
       - uses: actions/setup-java@v4
         with:
