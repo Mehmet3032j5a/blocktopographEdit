@@ -203,6 +203,43 @@ public class WorldData {
         this.openDB();
         return db.get(key);
     }
+    /**
+     * Scans the whole db for chunk keys that belong to non-vanilla dimensions
+     * (custom dimensions added with the script API use ids starting at 1000)
+     * and returns their ids, sorted ascending. This walks every key, so call it off the UI thread.
+     */
+    public java.util.SortedSet<Integer> findCustomDimensionIds() throws WorldDBException {
+        this.openDB();
+        java.util.SortedSet<Integer> ids = new java.util.TreeSet<>();
+        Iterator iterator = db.iterator();
+        try {
+            for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
+                byte[] key = iterator.getKey();
+                int tagIndex;
+                if (key.length == 13 || key.length == 14) {
+                    tagIndex = 12;
+                } else {
+                    continue;
+                }
+                if (!isChunkTagByte(key[tagIndex])) continue;
+                // A 14 byte key is only valid for sub chunk records.
+                if (key.length == 14 && key[tagIndex] != ChunkTag.TERRAIN.dataID) continue;
+                int id = (key[8] & 0xFF) | ((key[9] & 0xFF) << 8) | ((key[10] & 0xFF) << 16) | ((key[11] & 0xFF) << 24);
+                if (id > Dimension.END.id) ids.add(id);
+            }
+        } finally {
+            iterator.close();
+        }
+        return ids;
+    }
+
+    private static boolean isChunkTagByte(byte b) {
+        for (ChunkTag tag : ChunkTag.values()) {
+            if (tag != ChunkTag.NEWENTITY && tag.dataID == b) return true;
+        }
+        return false;
+    }
+
     public List<byte[]> findKeysWithPrefix(byte[] prefix) {
         List<byte[]> result = new ArrayList<>();
 

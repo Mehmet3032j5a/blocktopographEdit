@@ -198,12 +198,13 @@ public abstract class Chunk {
                     worldData.deleteKey(key);
                 }
             }else if(key.length == 13 || key.length == 14){
-                if(mDimension == Dimension.NETHER){
-                    if(key[8] == (byte) 1){
-                        worldData.deleteKey(key);
-                    }
-                }else if(mDimension == Dimension.END){
-                    if(key[8] == (byte) 2){
+                // Dimension id (nether, end or custom) is stored little endian at 8..11.
+                if(mDimension != Dimension.OVERWORLD){
+                    int keyDimId = (key[8] & 0xFF)
+                            | ((key[9] & 0xFF) << 8)
+                            | ((key[10] & 0xFF) << 16)
+                            | ((key[11] & 0xFF) << 24);
+                    if(keyDimId == mDimension.id){
                         worldData.deleteKey(key);
                     }
                 }
@@ -217,7 +218,7 @@ public abstract class Chunk {
                 System.arraycopy(digpString,0,digpByte,0,digpString.length);
                 System.arraycopy(chunk_X_Z,0,digpByte,digpString.length,chunk_X_Z.length);
                 worldData.deleteEntityOfChunk(digpByte);
-            }else if(mDimension == Dimension.NETHER || mDimension == Dimension.END){
+            }else{
                 byte[] digpByte = new byte[16];
                 System.arraycopy(digpString,0,digpByte,0,digpString.length);
                 System.arraycopy(chunk_X_Z,0,digpByte,digpString.length,chunk_X_Z.length);

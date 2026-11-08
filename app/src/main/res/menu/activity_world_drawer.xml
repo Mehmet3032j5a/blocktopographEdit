@@ -156,6 +156,13 @@
 
 
     <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_custom_dimension"
+            android:icon="@drawable/ic_action_map_b"
+            android:title="@string/custom_dimension_menu" />
+    </group>
+
+    <group android:checkableBehavior="none">
         <item android:title="@string/advanced_options">
             <menu>
                 <item

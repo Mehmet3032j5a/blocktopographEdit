@@ -190,7 +190,7 @@ public final class BedrockChunk extends Chunk {
 
     @Override
     public int getHeightLimit() {
-        if(isData3d && (mDimension == Dimension.getDimension(0))){
+        if(isData3d && mDimension.isOverworldLike()){
             return 320;
         }else{
             return 256;
@@ -203,12 +203,12 @@ public final class BedrockChunk extends Chunk {
         if (mIsVoid) return 0;
         short h = data2D.getShort(POS_HEIGHTMAP + (get2dOffset(x, z) << 1));
         int heightvalue;
-        if(isData3d && (mDimension == Dimension.getDimension(0))){
+        if(isData3d && mDimension.isOverworldLike()){
             heightvalue = (short) (((h & 0xff) << 8) | ((h >> 8) & 0xff)) - 64;
         }else{
             heightvalue =(short) ((h & 0xff) << 8) | ((h >> 8) & 0xff);
         }
-        if(heightvalue == -64 && mDimension == Dimension.OVERWORLD){
+        if(heightvalue == -64 && mDimension.isOverworldLike()){
             heightvalue = getHighestBlockYUnderAt(x,z,319)+1;
         }
         return heightvalue;

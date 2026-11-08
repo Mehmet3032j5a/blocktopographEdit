@@ -1,0 +1,41 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      # leveldb native code lives in a git submodule that is missing from a plain upload.
+      - name: Fetch leveldb-mcpe
+        run: |
+          rm -rf leveldb/src/main/cpp/leveldb-mcpe
+          git clone --depth 1 https://github.com/Mojang/leveldb-mcpe.git leveldb/src/main/cpp/leveldb-mcpe
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 8
+
+      - name: Install Android SDK / NDK
+        run: |
+          SDK=$ANDROID_HOME
+          yes | $SDK/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null || true
+          $SDK/cmdline-tools/latest/bin/sdkmanager "platforms;android-29" "platforms;android-31" "build-tools;29.0.3" "ndk;21.4.7075529"
+          echo "sdk.dir=$SDK" > local.properties
+          echo "ndk.dir=$SDK/ndk/21.4.7075529" >> local.properties
+
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blocktopograph-apk
+          path: app/build/outputs/apk/**/*.apk

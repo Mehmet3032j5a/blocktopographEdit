@@ -74,18 +74,8 @@ class AnalyzeTask extends AsyncTask<Void, Void, Rect> {
         if (db == null) return null;
 
         Dimension dimension = owner.mDimension;
-        int verKeyLenOfDim;
-        switch (dimension) {
-            case OVERWORLD:
-                verKeyLenOfDim = 9;
-                break;
-            case NETHER:
-            case END:
-                verKeyLenOfDim = 13;
-                break;
-            default:
-                return null;
-        }
+        // Overworld keys have no dimension id, every other dimension (incl. custom ones) does.
+        int verKeyLenOfDim = dimension == Dimension.OVERWORLD ? 9 : 13;
 
         // We used to separate world into areas or clusters, now that
         // we have selection so just measure whole world here.

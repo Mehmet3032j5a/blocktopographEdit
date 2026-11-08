@@ -228,6 +228,14 @@
     <string name="nether">Nether</string>
     <string name="map">Map</string>
     <string name="the_end">The End</string>
+    <string name="custom_dimension">Custom dimension</string>
+    <string name="custom_dimension_menu">Custom dimension…</string>
+    <string name="custom_dimension_scanning">Scanning world for custom dimensions…</string>
+    <string name="custom_dimension_pick">Select custom dimension</string>
+    <string name="custom_dimension_enter_id">Enter dimension ID…</string>
+    <string name="custom_dimension_id_hint">Dimension ID (e.g. 1000)</string>
+    <string name="custom_dimension_none_found">No custom dimension found in this world. You can still enter an ID manually.</string>
+    <string name="custom_dimension_invalid_id">Invalid dimension ID</string>
     <string name="map_options">Map options</string>
     <string name="toggle_grid">Toggle grid</string>
     <string name="toggle_entity_markers">Toggle markers/Entity</string>

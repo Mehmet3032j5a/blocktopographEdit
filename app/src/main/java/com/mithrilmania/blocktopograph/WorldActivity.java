@@ -404,31 +404,34 @@ public class WorldActivity extends AppCompatActivity
                 //TODO open tools menu (world downloader/importer/exporter maybe?)
                 break;*/
             case (R.id.nav_overworld_satellite):
-                changeMapType(MapType.OVERWORLD_SATELLITE, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_SATELLITE, overworldOrCustomDimension());
                 break;
             case (R.id.nav_overworld_cave):
-                changeMapType(MapType.OVERWORLD_CAVE, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_CAVE, overworldOrCustomDimension());
                 break;
             case (R.id.nav_overworld_slime_chunk):
-                changeMapType(MapType.OVERWORLD_SLIME_CHUNK, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_SLIME_CHUNK, overworldOrCustomDimension());
                 break;
             /*case(R.id.nav_overworld_debug):
                 changeMapType(MapType.DEBUG); //for debugging tiles positions, rendering, etc.
                 break;*/
             case (R.id.nav_overworld_heightmap):
-                changeMapType(MapType.OVERWORLD_HEIGHTMAP, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_HEIGHTMAP, overworldOrCustomDimension());
                 break;
             case (R.id.nav_overworld_biome):
-                changeMapType(MapType.OVERWORLD_BIOME, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_BIOME, overworldOrCustomDimension());
                 break;
             case (R.id.nav_overworld_grass):
-                changeMapType(MapType.OVERWORLD_GRASS, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_GRASS, overworldOrCustomDimension());
                 break;
             case (R.id.nav_overworld_xray):
-                changeMapType(MapType.OVERWORLD_XRAY, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_XRAY, overworldOrCustomDimension());
                 break;
             case (R.id.nav_overworld_block_light):
-                changeMapType(MapType.OVERWORLD_BLOCK_LIGHT, Dimension.OVERWORLD);
+                changeMapType(MapType.OVERWORLD_BLOCK_LIGHT, overworldOrCustomDimension());
+                break;
+            case (R.id.nav_custom_dimension):
+                openCustomDimensionPicker();
                 break;
             case (R.id.nav_nether_map):
                 changeMapType(MapType.NETHER, Dimension.NETHER);
@@ -1082,6 +1085,77 @@ public class WorldActivity extends AppCompatActivity
 
     public Dimension getDimension() {
         return this.dimension;
+    }
+
+    /**
+     * Overworld map types are also used for custom dimensions (same layout),
+     * so while a custom dimension is open they keep showing it instead of jumping to the overworld.
+     */
+    private Dimension overworldOrCustomDimension() {
+        return this.dimension.isCustom ? this.dimension : Dimension.OVERWORLD;
+    }
+
+    private void openCustomDimensionPicker() {
+        final WorldData worldData = world.getWorldData();
+        final AlertDialog progress = new AlertDialog.Builder(this)
+                .setMessage(R.string.custom_dimension_scanning)
+                .setCancelable(false)
+                .show();
+        new Thread(() -> {
+            final List<Integer> found = new ArrayList<>();
+            try {
+                found.addAll(worldData.findCustomDimensionIds());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            runOnUiThread(() -> {
+                progress.dismiss();
+                if (isFinishing()) return;
+                showCustomDimensionDialog(found);
+            });
+        }, "custom-dimension-scan").start();
+    }
+
+    private void showCustomDimensionDialog(final List<Integer> found) {
+        final String[] items = new String[found.size() + 1];
+        for (int i = 0; i < found.size(); i++) items[i] = "Custom " + found.get(i) + " (" + found.get(i) + ")";
+        items[found.size()] = getString(R.string.custom_dimension_enter_id);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(R.string.custom_dimension_pick)
+                .setItems(items, (dialog, which) -> {
+                    if (which < found.size()) openCustomDimension(found.get(which));
+                    else askCustomDimensionId();
+                })
+                .setNegativeButton(android.R.string.cancel, null);
+        if (found.isEmpty()) builder.setMessage(R.string.custom_dimension_none_found);
+        builder.show();
+    }
+
+    private void askCustomDimensionId() {
+        final EditText input = new EditText(this);
+        input.setInputType(android.text.InputType.TYPE_CLASS_NUMBER);
+        input.setHint(R.string.custom_dimension_id_hint);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.custom_dimension_enter_id)
+                .setView(input)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    try {
+                        openCustomDimension(Integer.parseInt(input.getText().toString().trim()));
+                    } catch (NumberFormatException e) {
+                        Toast.makeText(this, R.string.custom_dimension_invalid_id, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void openCustomDimension(int id) {
+        Dimension custom = Dimension.getDimension(id);
+        if (custom == null || !custom.isCustom) {
+            Toast.makeText(this, R.string.custom_dimension_invalid_id, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        changeMapType(MapType.OVERWORLD_SATELLITE, custom);
     }
 
     private MapType mapType = dimension.defaultMapType;

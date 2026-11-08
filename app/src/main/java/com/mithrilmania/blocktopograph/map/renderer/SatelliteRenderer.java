@@ -34,7 +34,7 @@ public class SatelliteRenderer implements MapRenderer {
         int originY = y;
         y--;
         int bottomY = 0;
-        if(chunk.mDimension == Dimension.OVERWORLD) bottomY = -64;
+        if(chunk.mDimension.isOverworldLike()) bottomY = -64;
         for (; y >= bottomY && alphaRemain >= .1f; y--) {
 
             count++;
