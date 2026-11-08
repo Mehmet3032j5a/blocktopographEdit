@@ -54,11 +54,6 @@ dependencies {
     //core is the new recommended alias for analytics
 //    implementation 'com.google.firebase:firebase-core:17.2.2'
 //    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
-    implementation platform('com.google.firebase:firebase-bom:31.5.0')
-
-    implementation 'com.google.firebase:firebase-analytics'
-
-    implementation 'com.google.firebase:firebase-crashlytics'
 
     //implementation 'org.jetbrains:annotations-java5:15.0'
     implementation 'com.tomergoldst.android:tooltips:1.1.1'
@@ -80,5 +75,3 @@ dependencies {
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.1'
 }
 
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'

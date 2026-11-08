@@ -5,9 +5,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.firebase.analytics.FirebaseAnalytics;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -22,13 +19,9 @@ public class Log {
 
     private static final String LOG_TAG = "Blocktopo";
 
-    private static FirebaseAnalytics mFirebaseAnalytics;
-    private static FirebaseCrashlytics mCrashlytics;
-
     private static PrintWriter mFileLogger;
 
-    private static boolean mIsFirebaseAnalyticsEnabled = false;
-    private static boolean mIsCrashlyticsEnabled = false;
+    // Firebase analytics / crashlytics are removed in this build (no google-services.json, dead fabric repo).
 
     private static String concat(@NonNull Object caller, @NonNull String msg) {
         Class clazz;
@@ -38,15 +31,11 @@ public class Log {
     }
 
     public static void enableFirebaseAnalytics(@NonNull Context context) {
-        getFirebaseAnalytics(context).setAnalyticsCollectionEnabled(true);
-        mIsFirebaseAnalyticsEnabled = true;
+        // no-op
     }
 
     public static void enableCrashlytics(@NonNull Context context) {
-        if (!BuildConfig.DEBUG) {
-            mCrashlytics = FirebaseCrashlytics.getInstance();
-            mIsCrashlyticsEnabled = true;
-        }
+        // no-op
     }
 
     public static void d(@NonNull Object caller, @NonNull String msg) {
@@ -61,8 +50,7 @@ public class Log {
     }
 
     public static void e(@NonNull Object caller, @NonNull String msg) {
-        if (mIsCrashlyticsEnabled)
-            mCrashlytics.log(concat(caller, msg));
+        android.util.Log.e(LOG_TAG, concat(caller, msg));
     }
 
     public static void e(@NonNull Object caller, @NonNull Throwable throwable) {
@@ -70,28 +58,14 @@ public class Log {
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw);
         android.util.Log.e(LOG_TAG, concat(caller, sw.toString()));
-        if (mIsCrashlyticsEnabled) mCrashlytics.recordException(throwable);
-    }
-
-    private synchronized static FirebaseAnalytics getFirebaseAnalytics(@NonNull Context context) {
-        if (mFirebaseAnalytics == null) {
-            mFirebaseAnalytics = FirebaseAnalytics.getInstance(context);
-
-            //don't measure the test devices in analytics ...Meow but why?
-            //How would a single test device influences data from all over the world...
-            //mFirebaseAnalytics.setAnalyticsCollectionEnabled(true);
-        }
-        return mFirebaseAnalytics;
     }
 
     public static void logFirebaseEvent(@NonNull Context context, @NonNull CustomFirebaseEvent firebaseEvent) {
-        if (mIsFirebaseAnalyticsEnabled)
-            getFirebaseAnalytics(context).logEvent(firebaseEvent.eventID, new Bundle());
+        // no-op
     }
 
     public static void logFirebaseEvent(@NonNull Context context, @NonNull CustomFirebaseEvent firebaseEvent, @NonNull Bundle eventContent) {
-        if (mIsFirebaseAnalyticsEnabled)
-            getFirebaseAnalytics(context).logEvent(firebaseEvent.eventID, eventContent);
+        // no-op
     }
 
     // Firebase events, these are meant to be as anonymous as possible,
