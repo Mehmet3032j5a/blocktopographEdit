@@ -22,11 +22,15 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 8
+          # sdkmanager needs Java 17, the old Gradle/AGP of this project needs Java 8 (last = default).
+          java-version: |
+            17
+            8
 
       - name: Install Android SDK / NDK
         run: |
           SDK=$ANDROID_HOME
+          export JAVA_HOME=$JAVA_HOME_17_X64
           yes | $SDK/cmdline-tools/latest/bin/sdkmanager --licenses >/dev/null || true
           $SDK/cmdline-tools/latest/bin/sdkmanager "platforms;android-29" "platforms;android-31" "build-tools;29.0.3" "ndk;21.4.7075529"
           echo "sdk.dir=$SDK" > local.properties
