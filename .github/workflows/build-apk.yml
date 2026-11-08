@@ -22,10 +22,10 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          # sdkmanager needs Java 17, the old Gradle/AGP of this project needs Java 8 (last = default).
+          # sdkmanager needs Java 17, the old Gradle/AGP of this project works with Java 11 (last = default).
           java-version: |
             17
-            8
+            11
 
       - name: Install Android SDK / NDK
         run: |
