@@ -52,6 +52,9 @@ public class NBTChunkData extends ChunkData {
                 buf.putInt(chunk.mChunkZ);
                 buf.putInt(chunk.mDimension.id);
             }
+            // The native lookup reads the key from position() to limit(); after the puts above
+            // position == limit, i.e. an empty key, so no entity was ever found. Rewind first.
+            buf.flip();
             byte[] actorprofix = chunk.getWorldData().getDataWithKey(buf);
             if(actorprofix == null) return;
 
