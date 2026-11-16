@@ -121,6 +121,7 @@ public final class LocatorPlayersFragment extends LocatorPageFragment {
                 worldData.openDB();
                 DimensionVector3<Float> localPlayerPos = world.getPlayerPos();
                 String[] mlst = worldData.getNetworkPlayerNames();
+                java.util.Map<String, String> savedNames = worldData.getPlayerNamesForKeys(mlst);
                 List<Player> playerList = new ArrayList<>();
 //                Player[] players;
 //                int offset;
@@ -148,6 +149,7 @@ public final class LocatorPlayersFragment extends LocatorPageFragment {
 
                     if (pos != null) {
                         Player player = Player.networkPlayer(s);
+                        player.setSavedName(savedNames.get(s));
                         player.setPosition(pos);
                         playerList.add(player);
                     }

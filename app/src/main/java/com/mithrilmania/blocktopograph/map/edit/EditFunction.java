@@ -5,5 +5,6 @@ public enum EditFunction {
     SNR,
     DCHUNK,
     CHBIOME,
-    PICER
+    PICER,
+    CLEAR_ENTITIES
 }

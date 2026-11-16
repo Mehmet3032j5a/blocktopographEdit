@@ -915,7 +915,7 @@ public class WorldActivity extends AppCompatActivity
         // just the database keys (loading each name from NBT could take an even longer time!)
         final Spinner spinner = new Spinner(this);
         ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, players);
+                android.R.layout.simple_spinner_item, getWorld().getWorldData().getPlayerLabels(players));
 
         spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(spinnerArrayAdapter);
