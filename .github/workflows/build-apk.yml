@@ -19,15 +19,22 @@ jobs:
       - name: Fetch leveldb-mcpe sources
         run: |
           dest=leveldb/src/main/cpp/leveldb-mcpe
-          if [ ! -f $dest/db/builder.cc ]; then
-            for repo in JJJollyjim/leveldb-mcpe The-HeX/leveldb-mcpe jocopa3/leveldb-mcpe; do
-              rm -rf $dest
-              if GIT_TERMINAL_PROMPT=0 git clone --depth 1 https://github.com/$repo.git $dest && [ -f $dest/db/builder.cc ]; then
-                echo "Using $repo"; break
-              fi
+          complete() {
+            missing=0
+            for f in $(grep -o 'leveldb-mcpe/[A-Za-z0-9_/]*\.cc' leveldb/src/main/cpp/Android.mk | sort -u); do
+              [ -f "leveldb/src/main/cpp/$f" ] || { echo "  missing $f"; missing=1; }
             done
-          fi
-          test -f $dest/db/builder.cc
+            return $missing
+          }
+          complete >/dev/null 2>&1 && exit 0
+          for repo in The-HeX/leveldb-mcpe jocopa3/leveldb-mcpe ddsswifttech/leveldb-mcpe DaanV2/leveldb-mcpe.Net JJJollyjim/leveldb-mcpe; do
+            echo "== trying $repo"
+            rm -rf $dest
+            if GIT_TERMINAL_PROMPT=0 git clone --depth 1 https://github.com/$repo.git $dest && complete; then
+              echo "Using $repo"; exit 0
+            fi
+          done
+          echo "No fork had every source file listed in Android.mk"; exit 1
 
       - uses: actions/setup-java@v4
         with:
