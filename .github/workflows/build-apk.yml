@@ -13,11 +13,11 @@ jobs:
         with:
           submodules: recursive
 
-      # Gradle 5.4.1 / AGP 3.5.3 need JDK 8.
+      # sdkmanager needs JDK 17; the old Gradle 5.4.1 / AGP 3.5.3 build needs JDK 8 (switched below).
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 8
+          java-version: 17
 
       - uses: android-actions/setup-android@v3
 
@@ -26,6 +26,11 @@ jobs:
           yes | sdkmanager --licenses > /dev/null || true
           sdkmanager "platforms;android-31" "platforms;android-29" "build-tools;30.0.3" "ndk;21.4.7075529"
           echo "ndk.dir=$ANDROID_SDK_ROOT/ndk/21.4.7075529" > local.properties
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 8
 
       # google-services.json is not in the repo; a placeholder is enough to build a debug APK.
       - name: Placeholder google-services.json
