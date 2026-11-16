@@ -14,6 +14,14 @@ jobs:
           submodules: recursive
 
       # AGP 7.4 / Gradle 7.5 build fine on JDK 17.
+      # The leveldb-mcpe submodule is listed in .gitmodules but not committed as a gitlink, so fetch it here.
+      - name: Fetch leveldb-mcpe sources
+        run: |
+          if [ ! -f leveldb/src/main/cpp/leveldb-mcpe/db/builder.cc ]; then
+            rm -rf leveldb/src/main/cpp/leveldb-mcpe
+            git clone --depth 1 https://github.com/Mojang/leveldb-mcpe.git leveldb/src/main/cpp/leveldb-mcpe
+          fi
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
