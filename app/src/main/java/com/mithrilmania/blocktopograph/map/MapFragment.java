@@ -872,6 +872,7 @@ public class MapFragment extends Fragment {
             case LAMPSHADE:
             case CHBIOME:
             case DCHUNK:
+            case CLEAR_ENTITIES:
                 new SelectionBasedContextFreeEditTask(func, args, this, world.getWorldData().mBlockRegistry).execute(
                         new RectEditTarget(
                                 world.getWorldData(),
@@ -1736,7 +1737,8 @@ public void filterMarker(AbstractMarker marker) {
                 //NBT tag type spinner
                 final Spinner spinner = new Spinner(activity.get());
                 ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(activity.get(),
-                        android.R.layout.simple_spinner_item, players);
+                        android.R.layout.simple_spinner_item,
+                        owner.get().world.getWorldData().getPlayerLabels(players));
 
                 spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 spinner.setAdapter(spinnerArrayAdapter);

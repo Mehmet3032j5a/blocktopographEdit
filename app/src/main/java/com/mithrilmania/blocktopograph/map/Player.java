@@ -15,6 +15,7 @@ public class Player {
     private final boolean isLocal;
     private String dbName;
     private DimensionVector3<Float> position;
+    private String savedName;
 
     private Player(boolean isLocal, String dbName) {
         this.isLocal = isLocal;
@@ -39,6 +40,19 @@ public class Player {
 
     public String getDbName() {
         return dbName;
+    }
+
+    public void setSavedName(String savedName) {
+        this.savedName = savedName;
+    }
+
+    public boolean hasSavedName() {
+        return savedName != null && !savedName.isEmpty();
+    }
+
+    /** Player's real name when known (from the Player Name Saver add-on), else the db key. */
+    public String getDisplayName() {
+        return hasSavedName() ? savedName : dbName;
     }
 
     public DimensionVector3<Float> getPosition() {

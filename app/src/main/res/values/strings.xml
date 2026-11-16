@@ -378,6 +378,11 @@
     <string name="create_world_biome_hint">Numeric ID of biome, 21 by default</string>
     <string name="picer_scale_approxim">Approximately %1$dx%2$d.</string>
     <string name="map_edit_func_dchunk">Delete Chunks</string>
+    <string name="map_edit_func_clear_entities">Clear Entities</string>
+    <string name="map_edit_clear_entities_explain">Deletes every entity of the given type inside your selected area (e.g. to remove lag machines). Enter one or more entity IDs separated by commas or spaces. Players are never deleted. Make a backup first!</string>
+    <string name="map_edit_clear_entities_hint">e.g. minecraft:zombie, item, minecraft:cow</string>
+    <string name="map_edit_clear_entities_empty">Please enter at least one entity ID.</string>
+    <string name="map_edit_clear_entities_done">Removed %1$d entities.</string>
     <string name="map_edit_dchunk_explain">This would DELETE all chunks involved within your selected area. Minecraft could later generate the area again, but your progress within would be lost. Unless you know what \"chunk\" is in Minecraft and understand the consequence, you shouln\'t proceed. Don\'t just follow random online articles.</string>
     <string name="map_edit_dchunk_warn_not_aligned">Your selected area was not aligned to chunk boundary. Don\'t worry, Blocktopograph can adjust for you. The actual deleted area would be slightly larger than the selection. To be accurate, it would be 0~15 blocks larger at each side. That\'s because the area can only be re-generated if it was deleted with its containing chunks. If you don\'t like the auto-adjustment you can cancel and change the selection yourself.</string>
     <string name="map_edit_dchunk_posbtn_with_auto_adjust">Continue with auto-adjust</string>

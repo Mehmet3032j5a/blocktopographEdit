@@ -16,6 +16,11 @@ import com.mithrilmania.blocktopograph.chunk.ChunkTag;
 import com.mithrilmania.blocktopograph.chunk.NBTChunkData;
 import com.mithrilmania.blocktopograph.chunk.Version;
 import com.mithrilmania.blocktopograph.map.Dimension;
+import com.mithrilmania.blocktopograph.nbt.convert.DataConverter;
+import com.mithrilmania.blocktopograph.nbt.tags.CompoundTag;
+import com.mithrilmania.blocktopograph.nbt.tags.LongTag;
+import com.mithrilmania.blocktopograph.nbt.tags.StringTag;
+import com.mithrilmania.blocktopograph.nbt.tags.Tag;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -28,7 +33,9 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Wrapper around level.dat world spec en levelDB database.
@@ -351,6 +358,88 @@ public class WorldData {
     public String[] getNetworkPlayerNames() {
         List<String> players = getDBKeysStartingWith("player_");
         return players.toArray(new String[0]);
+    }
+
+    private static final String DYNAMIC_PROPERTIES_KEY = "DynamicProperties";
+    private static final String PLAYER_NAME_PROPERTY_PREFIX = "playerName:";
+
+    /**
+     * Reads the world's script dynamic properties and returns the player id -> player name
+     * mappings saved by the "Bedrock World Editor - Player Name Saver" add-on
+     * (properties named "playerName:&lt;playerId&gt;").
+     */
+    public Map<String, String> getSavedPlayerNames() {
+        Map<String, String> names = new HashMap<>();
+        try {
+            openDB();
+            byte[] data = db.get(DYNAMIC_PROPERTIES_KEY.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            if (data == null || data.length == 0) return names;
+            for (Tag root : DataConverter.read(data)) {
+                if (!(root instanceof CompoundTag) || ((CompoundTag) root).getValue() == null) continue;
+                for (Tag child : ((CompoundTag) root).getValue()) {
+                    String name = child.getName();
+                    if (name == null || !name.startsWith(PLAYER_NAME_PROPERTY_PREFIX)) continue;
+                    if (child instanceof StringTag && ((StringTag) child).getValue() != null) {
+                        names.put(name.substring(PLAYER_NAME_PROPERTY_PREFIX.length()),
+                                ((StringTag) child).getValue());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            Log.d(this, e);
+        }
+        return names;
+    }
+
+    /**
+     * Maps player db keys (like "player_server_xxxxxxxx-...") to their saved names.
+     * Keys whose name is unknown are not part of the result.
+     */
+    public Map<String, String> getPlayerNamesForKeys(String[] dbKeys) {
+        Map<String, String> result = new HashMap<>();
+        Map<String, String> saved = getSavedPlayerNames();
+        if (saved.isEmpty()) return result;
+        for (String key : dbKeys) {
+            String name = null;
+            try {
+                byte[] data = db.get(key.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                if (data != null) {
+                    for (Tag root : DataConverter.read(data)) {
+                        if (!(root instanceof CompoundTag)) continue;
+                        // The script API's player.id is the entity's unique id.
+                        Tag uid = ((CompoundTag) root).getChildTagByKey("UniqueID");
+                        if (uid instanceof LongTag && ((LongTag) uid).getValue() != null) {
+                            name = saved.get(String.valueOf(((LongTag) uid).getValue()));
+                        }
+                        break;
+                    }
+                }
+            } catch (Exception e) {
+                Log.d(this, e);
+            }
+            if (name == null) {
+                // Fall back to the id embedded in the key itself.
+                for (String prefix : new String[]{"player_server_", "player_"}) {
+                    if (key.startsWith(prefix)) {
+                        name = saved.get(key.substring(prefix.length()));
+                        break;
+                    }
+                }
+            }
+            if (name != null) result.put(key, name);
+        }
+        return result;
+    }
+
+    /** "Name (db key)" when the name is known, otherwise just the db key. */
+    public String[] getPlayerLabels(String[] dbKeys) {
+        Map<String, String> names = getPlayerNamesForKeys(dbKeys);
+        String[] labels = new String[dbKeys.length];
+        for (int i = 0; i < dbKeys.length; i++) {
+            String name = names.get(dbKeys[i]);
+            labels[i] = name == null ? dbKeys[i] : name + " (" + dbKeys[i] + ")";
+        }
+        return labels;
     }
 
     public List<String> getDBKeysStartingWith(String startWith) {

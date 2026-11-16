@@ -1,6 +1,7 @@
 package com.mithrilmania.blocktopograph.map.selection;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.text.Editable;
@@ -10,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,6 +27,8 @@ import com.mithrilmania.blocktopograph.block.BlockRegistry;
 import com.mithrilmania.blocktopograph.databinding.FragSelMenuBinding;
 import com.mithrilmania.blocktopograph.map.FloatPaneFragment;
 import com.mithrilmania.blocktopograph.map.edit.ChBiomeFragment;
+import com.mithrilmania.blocktopograph.map.edit.ClearEntitiesEdit;
+import com.mithrilmania.blocktopograph.map.edit.SelectionBasedContextFreeEditTask;
 import com.mithrilmania.blocktopograph.map.edit.EditFunction;
 import com.mithrilmania.blocktopograph.map.edit.SearchAndReplaceFragment;
 import com.mithrilmania.blocktopograph.util.UiUtil;
@@ -155,6 +159,36 @@ public class SelectionMenuFragment extends FloatPaneFragment {
         Log.logFirebaseEvent(view.getContext(), Log.CustomFirebaseEvent.CH_BIOME);
     }
 
+    private void onChooseClearEntities(@NonNull View view) {
+        final Context context = new ContextThemeWrapper(view.getContext(), R.style.AppTheme);
+        final EditText input = new EditText(context);
+        input.setHint(R.string.map_edit_clear_entities_hint);
+        input.setSingleLine(false);
+        input.setMinLines(1);
+        input.setMaxLines(4);
+        FrameLayout container = new FrameLayout(context);
+        int pad = Math.round(view.getResources().getDisplayMetrics().density * 20);
+        container.setPadding(pad, pad / 2, pad, 0);
+        container.addView(input);
+        AlertDialog dialog = new AlertDialog.Builder(context)
+                .setTitle(R.string.map_edit_func_clear_entities)
+                .setMessage(R.string.map_edit_clear_entities_explain)
+                .setView(container)
+                .setPositiveButton(android.R.string.ok, (dialogInterface, i) -> {
+                    String text = input.getText().toString();
+                    if (ClearEntitiesEdit.parseIdentifiers(text).isEmpty()) {
+                        Toast.makeText(context, R.string.map_edit_clear_entities_empty, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Bundle args = new Bundle();
+                    args.putString(SelectionBasedContextFreeEditTask.KEY_ENTITY_IDS, text);
+                    mEditFunctionEntry.invokeEditFunction(EditFunction.CLEAR_ENTITIES, args);
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .create();
+        dialog.show();
+    }
+
     private void onChoosePicer(View view) {
         mEditFunctionEntry.invokeEditFunction(EditFunction.PICER, null);
     }
@@ -183,6 +217,7 @@ public class SelectionMenuFragment extends FloatPaneFragment {
         mBinding.content.funcDchunk.setOnClickListener(this::onChooseDchunk);
         mBinding.content.funcChbiome.setOnClickListener(this::onChooseChbiome);
         mBinding.content.funcPicer.setOnClickListener(this::onChoosePicer);
+        mBinding.content.funcClearEntities.setOnClickListener(this::onChooseClearEntities);
         return mBinding.getRoot();
     }
 

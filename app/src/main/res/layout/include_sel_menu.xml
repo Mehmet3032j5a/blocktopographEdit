@@ -167,6 +167,14 @@
                 android:layout_gravity="start"
                 android:text="@string/map_edit_func_picer" />
 
+            <TextView
+                android:id="@+id/func_clear_entities"
+                style="@style/AppTheme.Floating.SmallTextButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="@string/map_edit_func_clear_entities" />
+
         </GridLayout>
 
         <TextView

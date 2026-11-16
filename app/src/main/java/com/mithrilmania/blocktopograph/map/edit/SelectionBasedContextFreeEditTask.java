@@ -24,6 +24,10 @@ import java.lang.ref.WeakReference;
 public class SelectionBasedContextFreeEditTask extends
         AsyncTask<EditTarget, ChunkBasedEditResult, EditResultCode> {
 
+    public static final String KEY_ENTITY_IDS = "entity_ids";
+
+    private int mRemovedEntities = -1;
+
     @NonNull
     private final EditFunction mFunction;
 
@@ -80,6 +84,10 @@ public class SelectionBasedContextFreeEditTask extends
             }
             case DCHUNK:
                 return doDchunk(editTargets);
+            case CLEAR_ENTITIES: {
+                String ids = mArgs == null ? null : mArgs.getString(KEY_ENTITY_IDS);
+                return doClearEntities(ClearEntitiesEdit.parseIdentifiers(ids), editTargets);
+            }
             case CHBIOME: {
                 Serializable serFrom, serTo;
                 if (mArgs == null || !((serTo = mArgs.getSerializable(ChBiomeFragment.KEY_TO)) instanceof Biome))
@@ -106,6 +114,17 @@ public class SelectionBasedContextFreeEditTask extends
             editTarget.setMaxError(Integer.MAX_VALUE);
             editTarget.forEachChunk(edit);
         }
+        return EditResultCode.SUCCESS;
+    }
+
+    private EditResultCode doClearEntities(@NonNull java.util.Set<String> ids, @NonNull EditTarget... editTargets) {
+        if (ids.isEmpty()) return EditResultCode.GENERAL_FAILURE;
+        ClearEntitiesEdit edit = new ClearEntitiesEdit(ids);
+        for (EditTarget editTarget : editTargets) {
+            editTarget.setMaxError(Integer.MAX_VALUE);
+            editTarget.forEachChunk(edit);
+        }
+        mRemovedEntities = edit.getRemovedCount();
         return EditResultCode.SUCCESS;
     }
 
@@ -140,7 +159,12 @@ public class SelectionBasedContextFreeEditTask extends
                 return;
             switch (editResultCode) {
                 case SUCCESS:
-                    Toast.makeText(activity, R.string.general_done, Toast.LENGTH_SHORT).show();
+                    if (mFunction == EditFunction.CLEAR_ENTITIES && mRemovedEntities >= 0)
+                        Toast.makeText(activity,
+                                activity.getString(R.string.map_edit_clear_entities_done, mRemovedEntities),
+                                Toast.LENGTH_LONG).show();
+                    else
+                        Toast.makeText(activity, R.string.general_done, Toast.LENGTH_SHORT).show();
                     owner.refreshAfterEdit();
                     break;
                 case DB_ERROR:
