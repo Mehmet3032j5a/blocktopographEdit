@@ -20,6 +20,8 @@ jobs:
           java-version: 17
 
       - uses: android-actions/setup-android@v3
+        with:
+          packages: ''
 
       - name: Install SDK / NDK pieces
         run: |
