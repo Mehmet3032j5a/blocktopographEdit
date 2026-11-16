@@ -14,13 +14,20 @@ jobs:
           submodules: recursive
 
       # AGP 7.4 / Gradle 7.5 build fine on JDK 17.
-      # The leveldb-mcpe submodule is listed in .gitmodules but not committed as a gitlink, so fetch it here.
+      # The leveldb-mcpe submodule is listed in .gitmodules but not committed as a gitlink, and
+      # Mojang/leveldb-mcpe is no longer public, so try known forks until one has the sources.
       - name: Fetch leveldb-mcpe sources
         run: |
-          if [ ! -f leveldb/src/main/cpp/leveldb-mcpe/db/builder.cc ]; then
-            rm -rf leveldb/src/main/cpp/leveldb-mcpe
-            git clone --depth 1 https://github.com/Mojang/leveldb-mcpe.git leveldb/src/main/cpp/leveldb-mcpe
+          dest=leveldb/src/main/cpp/leveldb-mcpe
+          if [ ! -f $dest/db/builder.cc ]; then
+            for repo in JJJollyjim/leveldb-mcpe The-HeX/leveldb-mcpe jocopa3/leveldb-mcpe; do
+              rm -rf $dest
+              if GIT_TERMINAL_PROMPT=0 git clone --depth 1 https://github.com/$repo.git $dest && [ -f $dest/db/builder.cc ]; then
+                echo "Using $repo"; break
+              fi
+            done
           fi
+          test -f $dest/db/builder.cc
 
       - uses: actions/setup-java@v4
         with:
